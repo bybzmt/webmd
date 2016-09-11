@@ -5,7 +5,7 @@
 * 支持语法高亮
 * 支持graphviz绘图
 
-如果需要使用graphviz需要
+如果需要使用graphviz需要单独安装它
 
 语法高亮跟github是同一格式
 
