@@ -28,6 +28,12 @@ $("code").each(function(){
 
 prettyPrint()
 
-$("#left").load('/');
+var idx = location.href.lastIndexOf('/')
+
+if (idx > 0) {
+    $("#left").load(location.href.substr(0, idx));
+} else {
+    $("#left").load('/');
+}
 </script>
 </html>
