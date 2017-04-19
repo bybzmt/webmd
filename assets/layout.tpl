@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta charset="utf-8">
-<link href="assets/base.css" type="text/css" rel="stylesheet" />
+<link href="/assets/base.css" type="text/css" rel="stylesheet" />
 
-<script type="text/javascript" src="assets/jquery-3.1.0.min.js"></script>
+<script type="text/javascript" src="/assets/jquery-3.1.0.min.js"></script>
 
-<link href="assets/google-code-prettify/prettify.css" type="text/css" rel="stylesheet" />
-<script type="text/javascript" src="assets/google-code-prettify/prettify.js"></script>
+<link href="/assets/google-code-prettify/prettify.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="/assets/google-code-prettify/prettify.js"></script>
 </head>
 <body>
 
@@ -28,6 +28,12 @@ $("code").each(function(){
 
 prettyPrint()
 
-$("#left").load('/');
+var idx = location.href.lastIndexOf('/')
+
+if (idx > 0) {
+    $("#left").load(location.href.substr(0, idx));
+} else {
+    $("#left").load('/');
+}
 </script>
 </html>
