@@ -1,10 +1,11 @@
 package main
 
 import (
-	"encoding/base64"
+	//"encoding/base64"
 	"flag"
 	"github.com/russross/blackfriday"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,6 +27,25 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		filename := path.Join(*basedir, path.Clean(r.URL.Path))
+
+		//处理dot
+		regx, err := syntax.Parse(".dot$", syntax.PerlX|syntax.MatchNL|syntax.UnicodeGroups)
+		if err != nil {
+			http.Error(w, err.Error(), 404)
+			return
+		}
+
+		//log.Println(regx.String())
+		reg, err := regexp.Compile(regx.String())
+		if err != nil {
+			http.Error(w, err.Error(), 404)
+			return
+		}
+
+		if reg.MatchString(filename) {
+			parseDot(filename, w)
+			return
+		}
 
 		f, err := os.Open(filename)
 		if err != nil {
@@ -56,23 +76,6 @@ func main() {
 			return
 		}
 
-		//处理dot
-		regx, err := syntax.Parse("^<dot>.*</dot>", syntax.PerlX|syntax.MatchNL|syntax.UnicodeGroups)
-		if err != nil {
-			http.Error(w, err.Error(), 404)
-			return
-		}
-
-		//log.Println(regx.String())
-
-		reg, err := regexp.Compile(regx.String())
-		if err != nil {
-			http.Error(w, err.Error(), 404)
-			return
-		}
-
-		in = reg.ReplaceAllFunc(in, parseDot)
-
 		//处理markdown
 		out := parseMarkdown(in)
 
@@ -86,49 +89,45 @@ func main() {
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 
-func parseDot(in []byte) []byte {
-	c := exec.Command(*dot, "-Tpng")
+func parseDot(file string, w io.Writer) {
+	c := exec.Command(*dot, "-Tpng", file)
 
-	stdin, err := c.StdinPipe()
-	if err != nil {
-		return []byte("exec dot error:" + err.Error())
-	}
-
-	go func() {
-		defer stdin.Close()
-
-		start := len("<dot>")
-		end := len(in) - len("</dot>")
-
-		_, err := stdin.Write(in[start:end])
+	/*
+		stdin, err := c.StdinPipe()
 		if err != nil {
-			log.Println("exec dot error:" + err.Error())
+			w.Write("exec dot error:" + err.Error())
+			return
 		}
-	}()
+
+		go func() {
+			defer stdin.Close()
+
+			start := len("<dot>")
+			end := len(in) - len("</dot>")
+
+			_, err := stdin.Write(in[start:end])
+			if err != nil {
+				log.Println("exec dot error:" + err.Error())
+			}
+		}()
+	*/
 
 	stdout, err := c.StdoutPipe()
 	if err != nil {
-		return []byte("exec dot error:" + err.Error())
+		w.Write([]byte("exec dot error:" + err.Error()))
+		return
 	}
 
-	var out []byte
 	go func() {
 		defer stdout.Close()
 
-		out, err = ioutil.ReadAll(stdout)
-		if err != nil {
-			log.Println("exec dot error:" + err.Error())
-		}
+		io.Copy(w, stdout)
 	}()
 
 	err = c.Run()
 	if err != nil {
-		return []byte("exec dot error:" + err.Error())
+		w.Write([]byte("exec dot error:" + err.Error()))
 	}
-
-	en := base64.StdEncoding.EncodeToString(out)
-
-	return []byte("<p class='dot'><img src='data:image/png;base64," + en + "' /></p>")
 }
 
 func parseMarkdown(in []byte) []byte {

@@ -1,0 +1,13 @@
+digraph G {
+    rankdir = LR;
+
+    a, b, c, d, e, f, g, h, i, j, k, x, y [shape="box", width=.1, height=.1];
+
+    a -> b -> c -> d -> e -> f -> g -> x -> y;
+
+    a -> h -> c -> k -> i -> x;
+
+    k -> j -> i;
+}
+
+

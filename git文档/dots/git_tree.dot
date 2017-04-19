@@ -1,0 +1,15 @@
+digraph G {
+    rankdir = LR;
+
+    commit [label="hash", shape="box", height=.1,width=.1];
+
+    tree [shape="record", label="<hash1>/123.txt : hash1 | <hash2>/abc/345.txt : hash2 | <hash3>/def/789.png : hash3"];
+
+    file [shape="box", label="file1", height=.1, width=.1];
+
+    commit -> tree;
+
+    tree:hash1 -> file;
+}
+
+
