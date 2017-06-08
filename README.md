@@ -9,15 +9,15 @@
 
 语法高亮跟github是同一格式
 
-    ```go
+```go
     func main() {
         log.Pinttln("test");
     }
-    ```
+```
 
-graphviz按下面这样写就可以了 (`<dot>`必需顶格写)
+把graphviz文件存成.dot文件然后直接当成图片引入就可以了。
 
-    <dot>
+```dot
     digraph G {
         size="4,4";
         main [shape=box]; /*注释*/
@@ -33,7 +33,7 @@ graphviz按下面这样写就可以了 (`<dot>`必需顶格写)
         node [shape=box, style=filled, color=".7 .3 1.0"];
         execute -> compare;
     }
-    </dot>
+```
 
 上面的脚本会显成这张图：
 
